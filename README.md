@@ -8,8 +8,8 @@ A semi-automatic value-investing screener: four independent valuation methods, a
 
 ## Design principles
 
-- **Semi-automatic by design.** The tool computes everything computable; three judgement inputs per company stay human (moat rating, cyclicality flag, written thesis). No thesis → no verdict.
-- **Triangulation over precision.** Fair value = median of four independent methods (EPV, bear-case DCF, Graham Number, normalised multiples). If the methods disagree by more than 2.5×, the verdict is capped at WATCH — "you don't understand this company yet."
+- **Semi-automated.** The tool computes the figures; three judgement inputs per company stay human (moat rating, cyclicality flag, written thesis). No thesis → no verdict.
+- **Four-pronged methodology.** Fair value = median of four independent methods (EPV, bear-case DCF, Graham Number, normalised multiples). If the methods disagree by more than 2.5×, the verdict is capped at WATCH.
 - **The bear case binds.** Only the pessimistic DCF enters the consensus. Bull/base scenarios exist to measure estimate uncertainty and to power the asymmetry test.
 - **Tiered verdicts** (owner-designed): STRONG BUY / BUY / CAUTIOUS BUY / WATCH / PASS. A CAUTIOUS BUY (margin of safety 15–30%) additionally requires bull-case upside ≥ 3× bear-case downside, and is capped at half position size.
 - **Cash is a position.** The engine happily concludes that nothing is cheap enough.
@@ -28,7 +28,7 @@ python football_field.py    # renders valuation_chart.png
 
 Edit the `WATCHLIST` dict at the top of `engine_v01.py` to add companies and your own moat/cyclicality/thesis inputs. Verdicts are deliberately capped at WATCH until a written thesis exists — the tool refuses to be more confident than its owner.
 
-## Known limitations (v0.1) and roadmap
+## Limitations (v0.1) 
 
 v0.1 is deliberately harsh: it prices steady cash flows and refuses to pay for growth. That conservatism is the point — but it leaves the engine ignorant in known, documented ways. Full backlog in `docs/VERSION_PLAN.md`; headline items:
 
@@ -36,7 +36,7 @@ v0.1 is deliberately harsh: it prices steady cash flows and refuses to pay for g
 - **Growth lens / reverse DCF column** (#2, headline feature): every name gets an *implied growth* figure — the FCF growth rate today's price assumes — printed beside the margin of safety in the verdict table and report cards. v0.1 is blind to growth-priced names (it just prints a huge negative margin); v0.2 makes the engine say *"this price assumes 24%/yr for a decade — do you believe that?"* Already proven manually in the SPOT (~24%), PEP (~10%), KGF (−7.8%) and IMB (−8.4%) theses; v0.2 automates it.
 - **IFRS 16 lease adjustment** (#8): headline FCF for leased-estate retailers omits lease principal repayments (rent sits in financing). Found by benchmarking capex/D&A across peers — US owner-operators ~1.0, UK leaseholders 0.3–0.6. Kingfisher's ~£1.0bn FCF is nearer £650–750m adjusted; Tesco's overstated similarly. Until fixed, the engine systematically flatters UK leased retail vs US GAAP names.
 - **Maintenance vs growth capex** (#1): FCF deducts *all* capex, double-penalising firms investing in growth. Fix: owner earnings = OCF − min(capex, D&A), 4-yr medians.
-- **Structural-decliner mode** (#3): melting-ice-cube names (IMB) need break-even decline grids, not a bear DCF with a growth floor.
+- **Structural-decliner mode** (#3): melting names (IMB) need break-even decline grids, not a bear DCF with a growth floor.
 - **Risk panel + weighting engine** (#5): replace cliff-edge thresholds with per-metric subscores (distance from danger, drillable to components — no opaque composite); absolute kill-gates preserved underneath. Position sizing driven by the panel rather than flat 8%/4% caps.
 - **Multiples upgrade** (#6): own-history and sector medians instead of a flat 15×.
 - **Wrong-model flags** (#4): banks/insurers and pre-profit names get an explicit "wrong tool" refusal instead of quietly unreliable output.
