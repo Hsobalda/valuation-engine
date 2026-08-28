@@ -1,10 +1,10 @@
 # Valuation Engine
 
-A semi-automatic value-investing screener: four independent valuation methods, a tiered verdict ladder with an asymmetry test, and hard-coded conservatism (bear-case DCF only, growth capped at 2%, margin-of-safety hurdles). Built to answer one question rigorously: **what is this company worth, and how big is the gap to today's price?**
+A semi-automatic value-investing screener: four independent valuation methods, a tiered verdict ladder with an asymmetry test, and hard-coded conservatism (bear-case DCF only, growth capped at 2%, margin-of-safety hurdles). Built to answer one question rigorously: what is this company worth, and how big is the gap to today's price?*
 
 ![Valuation ranges vs price](valuation_chart.png)
 
-*Each bar spans the four methods' fair-value estimates (as % of current price); the diamond is the consensus, the black line is today's price. The horizontal gap between bar and line **is** the margin of safety.*
+*Each bar spans the four methods' fair-value estimates (as % of current price); the diamond is the consensus, the black line is today's price. The horizontal gap between bar and line *is* the margin of safety.*
 
 ## Design principles
 
