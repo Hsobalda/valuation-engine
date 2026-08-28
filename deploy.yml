@@ -1,0 +1,52 @@
+name: Update Engine & Deploy Website
+
+on:
+  push:
+    paths:
+      - "engine_v01.py"        # fires whenever you edit watchlist, theses, or engine
+      - "report_card.py"
+  workflow_dispatch:          # adds a manual "Run" button in GitHub Actions
+  schedule:
+    - cron: "0 6 * * 1,4"     # refreshes live prices every Mon & Thu morning
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Re-run engine (live data -> report cards)
+        run: python report_card.py
+
+      - name: Convert report cards to website dataset
+        run: python scripts/reports_to_json.py --out src/engine/engine-data.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build static website
+        run: |
+          npm install
+          npm run build
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
