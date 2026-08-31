@@ -9,7 +9,7 @@ Each method attacks "what's it worth?" from a different direction. Agreement bet
 
 ### Method 1 — Earnings Power Value (EPV) · the "no-growth floor"
 `EPV = normalised FCF ÷ discount rate` — what the company is worth if it NEVER grows again.
-- Normalised FCF = median of last 5 years' free cash flow (median kills one-off spikes)
+- Normalised FCF = median of available FCF history, typically ~4 years (amended 31 Aug 2026: data source supplies ~4 years, the 5-yr window was uncomputable as written). Median kills one-off spikes
 - Fully automatic. The most honest number in the stack: any price below EPV means the market is paying you to hold zero-growth pessimism.
 
 ### Method 2 — Three-scenario DCF · the workhorse
@@ -47,7 +47,7 @@ What would the price be at (a) the company's own 5-yr median P/E, and (b) sector
   - `CAUTIOUS BUY`: MoS 15–30% AND **asymmetry test**: (bull FV − price) ≥ 3 × (price − bear FV) AND no fatal flags → **weight capped at half a normal position**. Rationale: a thin cushion is only acceptable when the payoff is heavily skewed in your favour
   - `WATCH`: MoS ≥ 0%, or failed asymmetry test
   - `PASS`: negative MoS, or any fatal flag
-- **Fatal flags** (auto): interest coverage < 2× · Altman Z < 1.8 · FCF negative in 3 of last 5 yrs · F-Score ≤ 3
+- **Fatal flags** (auto): interest coverage < 2× · Altman Z < 1.8 · FCF negative in 3 of N available yrs, or 2 of N yrs when the FCF trend (OLS slope) is not positive (signed 31 Aug 2026 — supersedes "3 of last 5") · F-Score ≤ 3. Missing data prints a visible note, never a silent pass
 - **Method disagreement warning:** if max method ÷ min method > 2.5, verdict is capped at WATCH — "your methods don't agree; you don't understand this company yet"
 
 ---

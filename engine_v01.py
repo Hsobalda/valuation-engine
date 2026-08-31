@@ -170,6 +170,17 @@ def fetch(symbol):
     ebit = inc.loc['EBIT'].dropna().iloc[0] if 'EBIT' in inc.index else None
     interest = inc.loc['Interest Expense'].dropna().iloc[0] if 'Interest Expense' in inc.index else None
 
+    # Balance sheet + sorted income statement for Altman Z / F-Score.
+    # yfinance column order varies, so sort explicitly: oldest fiscal year -> newest.
+    bs = t.balance_sheet
+    if bs is not None and not bs.empty:
+        bs = bs.sort_index(axis=1)
+    inc_s = inc.sort_index(axis=1) if inc is not None and not inc.empty else None
+    cfo = None
+    if cf is not None and 'Operating Activities' in cf.index:
+        cfo_s = cf.loc['Operating Activities'].dropna()
+        cfo = cfo_s.iloc[0] if len(cfo_s) else None   # cf rows are newest-first
+
     price_ccy = info.get('currency')
     fin_ccy = info.get('financialCurrency')
     # Yahoo quirk: for London tickers the PRICE is in pence (GBp) but per-share
@@ -189,6 +200,7 @@ def fetch(symbol):
         'fcf_hist': fcf_hist,                     # statement currency!
         'ni_hist': ni_hist,                       # statement currency!
         'ebit': ebit, 'interest': interest,
+        'bs': bs, 'inc_s': inc_s, 'cfo': cfo,     # statement currency, oldest -> newest cols
         'fx': fx_to_price_ccy(fin_ccy, price_ccy),
     }
 
@@ -208,6 +220,98 @@ def hist_growth(series):
         return 0.0
     years = len(series) - 1
     return (series[0] / series[-1]) ** (1 / years) - 1
+
+
+def fcf_trend(series):
+    """OLS slope of FCF vs time, in FCF units per year. series is newest-first.
+    Positive slope = cash flow improving. 0.0 when fewer than 3 points (no trend to fit)."""
+    ys = list(reversed(series))          # oldest -> newest
+    n = len(ys)
+    if n < 3:
+        return 0.0
+    xs = list(range(n))
+    mx = (n - 1) / 2.0
+    my = sum(ys) / n
+    var = sum((x - mx) ** 2 for x in xs)
+    cov = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    return cov / var if var else 0.0
+
+
+def _cell(frame, name):
+    """Latest non-NaN value of a row in an oldest->newest frame, else None."""
+    try:
+        v = frame.loc[name].dropna()
+        return None if v.empty else v.iloc[-1]
+    except Exception:
+        return None
+
+
+def altman_z(d):
+    """Altman Z from the latest fiscal year. Returns (z, missing) — z is None
+    when any component is missing. MVE is converted to statement currency."""
+    bs = d.get('bs')
+    if bs is None or bs.shape[1] < 1:
+        return None, 'balance sheet'
+    ta = _cell(bs, 'Total Assets')
+    ca = _cell(bs, 'Current Assets')
+    cl = _cell(bs, 'Current Liabilities')
+    re_ = _cell(bs, 'Retained Earnings')
+    rev_frame = d.get('inc_s')
+    if rev_frame is None or rev_frame.empty:
+        rev_frame = bs
+    sa = _cell(rev_frame, 'Total Revenue')
+    ebit, mve, fx = d.get('ebit'), d.get('mkt_cap'), d.get('fx', 1.0)
+    if mve is not None:
+        mve = mve / fx                     # price ccy -> statement ccy
+    missing = [n for n, v in (('total assets', ta), ('current assets', ca),
+                              ('current liabilities', cl), ('retained earnings', re_),
+                              ('sales', sa), ('EBIT', ebit), ('market cap', mve)) if v is None]
+    if ta is None or ta == 0 or missing:
+        return None, ', '.join(missing)
+    z = (1.2 * (ca - cl) + 1.4 * re_ + 1.0 * ebit + 0.6 * mve + 0.999 * sa) / ta
+    return z, None
+
+
+def f_score(d):
+    """Piotroski F-Score 0-9 from the two latest fiscal years. Returns (score, missing) —
+    score is None when a component is missing (no partial scores, no silent passes)."""
+    bs, inc = d.get('bs'), d.get('inc_s')
+    if bs is None or inc is None or bs.shape[1] < 2 or inc.shape[1] < 2:
+        return None, 'need 2 years of statements'
+    def v1(frame, name): return _cell(frame, name)
+    def v0(frame, name):
+        try:
+            s = frame.loc[name].dropna()
+            return None if len(s) < 2 else s.iloc[-2]
+        except Exception:
+            return None
+    ni1, ta1, ltd1, ca1, cl1, sh1 = v1(inc, 'Net Income'), v1(bs, 'Total Assets'), \
+        v1(bs, 'Long Term Debt'), v1(bs, 'Current Assets'), v1(bs, 'Current Liabilities'), \
+        v1(bs, 'Ordinary Shares Number') or v1(bs, 'Share Issued')
+    ni0, ta0, ltd0, ca0, cl0, sh0 = v0(inc, 'Net Income'), v0(bs, 'Total Assets'), \
+        v0(bs, 'Long Term Debt'), v0(bs, 'Current Assets'), v0(bs, 'Current Liabilities'), \
+        v0(bs, 'Ordinary Shares Number') or v0(bs, 'Share Issued')
+    rev1, rev0 = v1(inc, 'Total Revenue'), v0(inc, 'Total Revenue')
+    cogs1, cogs0 = v1(inc, 'Cost Of Revenue'), v0(inc, 'Cost Of Revenue')
+    cfo = d.get('cfo')
+    missing = [n for n, v in (('NI', ni1), ('TA', ta1), ('LTD', ltd1), ('CA', ca1),
+                              ('CL', cl1), ('shares', sh1), ('NI0', ni0), ('TA0', ta0),
+                              ('LTD0', ltd0), ('CA0', ca0), ('CL0', cl0), ('shares0', sh0),
+                              ('revenue', rev1), ('revenue0', rev0),
+                              ('COGS', cogs1), ('COGS0', cogs0), ('CFO', cfo)) if v is None]
+    if missing:
+        return None, ', '.join(missing)
+    s = 0
+    s += ni1 > 0                                            # 1 ROA positive
+    s += cfo > 0                                            # 2 cash flow positive
+    s += (ni1 / ta1) > (ni0 / ta0)                          # 3 ROA improved
+    s += cfo > ni1                                          # 4 accruals: cash > income
+    s += (ltd1 / ta1) < (ltd0 / ta0)                        # 5 leverage down
+    s += (ca1 / cl1) > (ca0 / cl0)                          # 6 liquidity up
+    s += sh1 <= sh0                                         # 7 no dilution
+    s += (1 - cogs1 / rev1) > (1 - cogs0 / rev0)            # 8 gross margin up
+    s += (rev1 / ta1) > (rev0 / ta0)                        # 9 asset turnover up
+    return s, None
 
 
 def epv(d, r):
@@ -254,14 +358,40 @@ def multiples(d):
 
 
 def fatal_flags(d):
-    flags = []
+    """Signed fatal flags. Returns (flags, notes): flags PASS the verdict,
+    notes are visible data gaps (missing data never silently passes).
+    Signed 31 Aug 2026: FCF negative 3 of N = fatal; 2 of N = fatal only
+    when the FCF trend (OLS slope) is not positive. Z < 1.8 and F-Score <= 3
+    restore the two signed kill-gates that were in the spec but not the code."""
+    flags, notes = [], []
     if d['ebit'] is not None and d['interest'] not in (None, 0):
         if d['ebit'] / abs(d['interest']) < 2:
             flags.append('interest coverage < 2x')
-    neg_years = sum(1 for f in d['fcf_hist'] if f < 0)
-    if len(d['fcf_hist']) >= 3 and neg_years >= 2:
-        flags.append(f'FCF negative in {neg_years} of {len(d["fcf_hist"])} yrs')
-    return flags
+    elif d['ebit'] is None or d['interest'] is None:
+        notes.append('interest coverage: missing data')
+
+    neg = sum(1 for f in d['fcf_hist'] if f < 0)
+    n = len(d['fcf_hist'])
+    if n >= 3:
+        if neg >= 3:
+            flags.append(f'FCF negative {neg} of {n} yrs')
+        elif neg == 2 and fcf_trend(d['fcf_hist']) <= 0:
+            flags.append(f'FCF negative 2 of {n} yrs, no growth trend')
+    elif n > 0:
+        notes.append(f'FCF flag: only {n} yrs available, rule needs 3')
+
+    z, z_missing = altman_z(d)
+    if z is None:
+        notes.append(f'Altman Z: missing {z_missing}')
+    elif z < 1.8:
+        flags.append(f'Altman Z {z:.2f} < 1.8')
+
+    fs, fs_missing = f_score(d)
+    if fs is None:
+        notes.append(f'F-Score: missing {fs_missing}')
+    elif fs <= 3:
+        flags.append(f'F-Score {fs}/9 <= 3')
+    return flags, notes
 
 
 def assess(symbol):
@@ -272,14 +402,16 @@ def assess(symbol):
     g = hist_growth(d['fcf_hist'])
 
     bear = dcf(d, clamp(g, -0.02, 0.02), r)
+    base = dcf(d, clamp(g, 0.0, 0.06), r)     # spec's third scenario; display only in v0.1.1
     bull = dcf(d, clamp(g, 0.02, 0.10), r)
     methods = {'EPV': epv(d, r), 'DCF(bear)': bear,
                'Graham': graham(d), 'Multiples': multiples(d)}
     valid = {k: v for k, v in methods.items() if v is not None}
 
+    flags, hnotes = fatal_flags(d)
     result = {'d': d, 'inputs': inputs, 'rate': r, 'methods': methods,
-              'bull': bull, 'flags': fatal_flags(d), 'fair': None,
-              'mos': None, 'verdict': 'NO DATA', 'weight': 0.0, 'notes': []}
+              'bull': bull, 'base': base, 'flags': flags, 'fair': None,
+              'mos': None, 'verdict': 'NO DATA', 'weight': 0.0, 'notes': list(hnotes)}
     if len(valid) < 2:
         result['notes'].append('fewer than 2 valid methods')
         return result
@@ -354,8 +486,12 @@ def report(results):
     print(line)
     print('\nPer-method fair values (price currency):')
     for res in results:
+        d = res['d']
         parts = ', '.join(f'{k}={v:.2f}' if v else f'{k}=n/a' for k, v in res['methods'].items())
-        print(f"  {res['d']['symbol']:8} r={res['rate']*100:.0f}%  {parts}, Bull DCF={res['bull'] and round(res['bull'],2)}")
+        slope = fcf_trend(d['fcf_hist']) * d['fx']
+        base = f"{res['base']:.2f}" if res['base'] else 'n/a'
+        bull = f"{res['bull']:.2f}" if res['bull'] else 'n/a'
+        print(f"  {d['symbol']:8} r={res['rate']*100:.0f}%  {parts}, Base DCF={base}, Bull DCF={bull}, FCF slope={slope:+,.0f}/yr")
 
 
 if __name__ == '__main__':

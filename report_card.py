@@ -6,7 +6,7 @@
 import os, sys
 from statistics import median
 from engine_v01 import (WATCHLIST, fetch, epv, dcf, graham, multiples, fatal_flags,
-                        clamp, hist_growth, discount_rate, assess, BARS,
+                        clamp, hist_growth, fcf_trend, discount_rate, assess, BARS,
                         CYCLICAL_MOS_BUMP, DISAGREE_CAP)
 
 
@@ -113,7 +113,10 @@ def card(symbol):
     add('\n## 3 | Growth lens')
     g_hist = hist_growth(d['fcf_hist'])
     hist_str = ' -> '.join(f'{f/1e9:.2f}' for f in reversed(d['fcf_hist']))
-    add(f"- FCF history (bn, oldest->newest): {hist_str}  (trend {g_hist*100:+.1f}%/yr)")
+    slope = fcf_trend(d['fcf_hist']) / 1e9
+    add(f"- FCF history (bn, oldest->newest): {hist_str}  (trend {g_hist*100:+.1f}%/yr, slope {slope:+.2f}bn/yr)")
+    if res.get('base'):
+        add(f"- Base-case DCF (growth {clamp(g_hist,0.0,0.06)*100:.0f}%): {res['base']:,.0f} -- reference scenario, display only")
     if res['bull']:
         add(f"- Bull-case DCF (growth {clamp(g_hist,0.02,0.10)*100:.0f}%): {res['bull']:,.0f} -- upside ceiling if optimism is right")
     ig = implied_growth(d, r, price)
