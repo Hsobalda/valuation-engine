@@ -123,6 +123,16 @@ WATCHLIST = {
                           'hurt. Wrong if: fibre net adds fall below 1m/yr (breaking an 8 year streak), '
                           'leverage stuck above 3x into 2027, or price war erupts. Add toward 8% only if '
                           'MoS reaches 30% (price ~$21) with flags still clean. [Signed 25 Aug 2026]')},
+    'BT-A.L': {'moat': 'narrow', 'cyclical': False,   # UK telecom incumbent, Openreach network
+               'thesis': 'TODO: owner thesis required.'},
+    'CMCSA': {'moat': 'narrow', 'cyclical': False,    # US cable/broadband infrastructure + NBCU
+               'thesis': ('TODO: owner thesis required. Scan 29 Aug 2026: +39% MoS, 4 methods, '
+                          'spread 1.8x, no flags. The shape: market hates the broadband subscriber '
+                          'bleed to fixed wireless; meanwhile ~$15bn FCF, relentless buybacks, owned '
+                          'infrastructure, US GAAP (no lease distortion). AT&T-adjacent pattern. '
+                          'Thesis must answer: 1) is the sub bleed a melt or a cycle, 2) does '
+                          'broadband ARPU pricing power offset volume losses, 3) NBCU/Epic: asset '
+                          'or distraction, 4) why is this cheaper than T on the same story.')},
 }
 
 # Locked parameters (see spec)
