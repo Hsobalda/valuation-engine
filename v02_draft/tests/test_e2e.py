@@ -7,7 +7,7 @@ import pytest
 
 from v02_draft import run
 
-SNAPS = os.path.join(os.path.dirname(__file__), '..', 'snapshots')
+SNAPS = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
 def _assess(symbol, fixture):
