@@ -1,7 +1,8 @@
 """sizing.py -- position sizing engine (spec Part B, COMPARISON item 2.2).
 
-weight_i  ~  margin_of_safety_i / risk_i   (risk = (100 - composite)/100,
-             floored so a perfect score cannot divide by zero)
+weight_i  ~  margin_of_safety_i / risk_i   (risk = composite/100 on the
+             inverted scale where 100 = riskiest, floored at 0.10 so a
+             perfect score cannot divide by zero)
 then normalise across BUY-rated names, apply caps, keep the rest as cash.
 Caps (8% / 4% / 25% sector / 2% min) are from the signed spec; the
 normalisation and MAX_DEPLOYED fraction are DRAFT.
@@ -25,7 +26,7 @@ def size_positions(assessments, current_weights=None):
     if candidates:
         raw = {}
         for a in candidates:
-            risk = max((100 - a['risk_composite']) / 100.0, 0.10)
+            risk = max(a['risk_composite'] / 100.0, 0.10)   # 100 = riskiest
             cap = P.HALF_POS if a['verdict'] == 'CAUTIOUS BUY' else P.FULL_POS
             raw[a['symbol']] = max(a['mos'], 0.0) / risk, cap
         total = sum(r for r, _ in raw.values())

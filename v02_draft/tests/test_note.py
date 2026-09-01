@@ -32,6 +32,8 @@ def test_note_contains_every_section():
         assert fragment in html, f'missing section: {fragment}'
     # no un-rendered python braces leaking into the document
     assert "{'" not in html and "'}" not in html
+    # the price line is a full-height overlay through all method rows
+    assert 'class="overlay"' in html and 'priceline' in html and 'plabel' in html
 
 
 def test_note_wrong_tool():
@@ -55,8 +57,9 @@ def test_formatters():
     assert fmt_px(None, 'USD') == 'n/a'
     assert pct(-0.079) == '-7.9%'
     assert pct(None) == 'n/a'
-    assert heat(85) == 'good' and heat(55) == 'ok'
-    assert heat(40) == 'warn' and heat(10) == 'bad' and heat(None) == 'grey'
+    # risk scale: high score = red
+    assert heat(85) == 'bad' and heat(55) == 'warn'
+    assert heat(40) == 'ok' and heat(10) == 'good' and heat(None) == 'grey'
 
 
 def test_write_notes_end_to_end(tmp_path):

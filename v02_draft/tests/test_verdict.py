@@ -132,6 +132,8 @@ def test_scaled_bar_off_by_default():
 
 
 def test_scaled_bar_on():
-    assert scaled_bar(0.30, 100, enabled=True) == pytest.approx(0.30 * 0.83)
-    assert scaled_bar(0.30, 0, enabled=True) == pytest.approx(0.30 * 1.33)
+    # inverted risk scale: 100 = riskiest -> bar scaled UP by 1.33;
+    # 0 = safest -> bar earned down to x0.83
+    assert scaled_bar(0.30, 100, enabled=True) == pytest.approx(0.30 * 1.33)
+    assert scaled_bar(0.30, 0, enabled=True) == pytest.approx(0.30 * 0.83)
     assert scaled_bar(0.30, 50, enabled=True) == pytest.approx(0.30 * 1.08)

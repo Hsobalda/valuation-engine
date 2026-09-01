@@ -1,12 +1,14 @@
 """risk.py -- the RISK PANEL (VERSION_PLAN issue #5, COMPARISON item 1.2).
 
 Design (owner, 25 Aug 2026): continuous subscores instead of cliff edges.
-Each metric scores 0-100 by DISTANCE FROM DANGER, carries a plain-language
-reason, and is individually inspectable. No weights at display level.
+Scale matches the ENGINE_DESIGN spec: **0-100 where HIGHER = RISKIER**
+(0 = far from danger, 100 = at/past danger). Each metric carries a
+plain-language reason and is individually inspectable; no weights at
+display level.
 
 A composite is computed ONLY where a decision needs an ordering (position
-sizing, ranking) and must always be shown WITH the panel. Absolute kill-gates
-(fatal flags) survive underneath: they cannot be averaged away.
+sizing, ranking) and must always be shown WITH the panel. Absolute
+kill-gates (fatal flags) survive underneath: they cannot be averaged away.
 """
 
 from __future__ import annotations
@@ -41,15 +43,17 @@ def _fmt(x, pct=False, mult=False):
     return f'{x:,.0f}'
 
 
-# Anchor curves: value -> score (100 = far from danger, 0 = at/past danger).
+# Anchor curves: value -> RISK score (0 = far from danger, 100 = at danger).
+# Inverted on owner request 1 Sep 2026 to match ENGINE_DESIGN ("higher =
+# riskier"); the underlying distance-from-danger geometry is unchanged.
 # DRAFT -- owner sign-off required for every curve.
 _CURVES = {
-    'coverage':     [(-9, 0), (1, 5), (2, 35), (3, 55), (5, 75), (8, 90), (12, 100)],
-    'leverage':     [(0, 100), (1, 85), (2, 70), (3, 50), (4, 25), (5, 0), (9, 0)],
-    'fcf_stability': [(0.0, 100), (0.15, 80), (0.30, 60), (0.50, 35), (0.75, 15), (1.0, 0)],
-    'method_agreement': [(1.0, 100), (1.5, 75), (2.0, 45), (2.5, 20), (3.5, 0)],
-    'accruals':     [(-0.05, 100), (0.0, 85), (0.03, 65), (0.06, 45), (0.10, 20), (0.15, 0)],
-    'measurement':  [(5, 100), (4, 80), (3, 55), (2, 25), (1, 0)],
+    'coverage':     [(-9, 100), (1, 95), (2, 65), (3, 45), (5, 25), (8, 10), (12, 0)],
+    'leverage':     [(0, 0), (1, 15), (2, 30), (3, 50), (4, 75), (5, 100), (9, 100)],
+    'fcf_stability': [(0.0, 0), (0.15, 20), (0.30, 40), (0.50, 65), (0.75, 85), (1.0, 100)],
+    'method_agreement': [(1.0, 0), (1.5, 25), (2.0, 55), (2.5, 80), (3.5, 100)],
+    'accruals':     [(-0.05, 0), (0.0, 15), (0.03, 35), (0.06, 55), (0.10, 80), (0.15, 100)],
+    'measurement':  [(5, 0), (4, 20), (3, 45), (2, 75), (1, 100)],
 }
 
 
@@ -59,7 +63,7 @@ def subscore(name, value, reason_fmt):
         return {'score': None, 'value': None,
                 'reason': f'{name}: no data -- subscore excluded'}
     return {'score': score, 'value': value,
-            'reason': f'{name}: {reason_fmt(value)} -> {score}/100'}
+            'reason': f'{name}: {reason_fmt(value)} -> risk {score}/100'}
 
 
 def risk_panel(bundle, methods_valid, flags):
@@ -74,8 +78,8 @@ def risk_panel(bundle, methods_valid, flags):
 
     lev = M.net_debt_to_ebitda(bundle)
     if lev is None:
-        # D/E anchors differ from net-debt/EBITDA anchors; refuse to fake a
-        # comparable score. The panel prefers an honest gap to a wrong number.
+        # refuse to fake a comparable score from a different ratio; the panel
+        # prefers an honest gap to a wrong number.
         panel['leverage'] = {'score': None, 'value': None,
                              'reason': 'leverage: net debt/EBITDA unavailable '
                                        '(EBITDA missing) -- subscore excluded'}
@@ -111,15 +115,18 @@ def risk_panel(bundle, methods_valid, flags):
                               / wsum)
     return {'panel': panel, 'composite': composite,
             'kill_gates': list(flags or []),
-            'note': 'panel for judgement; composite only ranks; gates cannot '
-                    'be averaged away'}
+            'note': 'higher = riskier (0 far from danger, 100 at it); '
+                    'panel for judgement; composite only ranks; gates '
+                    'cannot be averaged away'}
 
 
 def print_panel(risk, indent='  '):
     for name, sub in risk['panel'].items():
         score = 'n/a' if sub['score'] is None else f"{sub['score']:>3}"
         print(f"{indent}{score}/100  {sub['reason']}")
-    print(f"{indent}composite {risk['composite']}/100 (weights DRAFT, ordering only)")
+    comp = risk['composite']
+    comp_s = 'n/a' if comp is None else f'{comp}'
+    print(f"{indent}composite {comp_s}/100 risk (weights DRAFT, ordering only)")
     if risk['kill_gates']:
         for g in risk['kill_gates']:
             print(f"{indent}KILL-GATE: {g}")

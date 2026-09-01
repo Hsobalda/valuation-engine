@@ -2,6 +2,11 @@
 
 **Status: DRAFT. Nothing here touches `engine_v01.py`.** This package implements the improvement list from [`docs/COMPARISON.md`](../docs/COMPARISON.md) (itself the survey of comparable repos). Every parameter added beyond the v0.1 locked set lives in `params.py` Section B, marked `DRAFT -- OWNER SIGN-OFF REQUIRED`.
 
+Auto-refresh: `.github/workflows/notes.yml` rebuilds notes/ on every push
+touching the engine, on the Mon/Thu 06:00 UTC schedule, or manually; it tries
+live Yahoo data first, falls back to committed snapshots, runs the tests, and
+commits the refreshed notes back.
+
 ```bash
 python -m v02_draft.run                      # offline run on cached snapshots
 python -m v02_draft.run T IMB.L --panels --grid --size
@@ -20,7 +25,7 @@ python -m v02_draft.note --live T            # refresh snapshot first, then buil
 | `data.py` | hardened single fetch layer, yfinance field normalisation (dividendYield percent-vs-fraction, renamed rows), **snapshot cache + offline replay**, **data-quality audit panel** | COMPARISON 0.2, 0.3 |
 | `metrics.py` | **Piotroski F-Score** (9 criteria, drillable), **Altman Z** (+ Z'' reported alongside), **Sloan accruals**, FCF/NI backing, dilution trend, FCF stability, completed fatal-flag set | spec'd-uncoded flags; Layer 4 |
 | `valuation.py` | **owner earnings** (OCF − min(capex, D&A)), **IFRS 16 lease adjustment**, peer-median Method 4 with printed provenance, **reverse DCF: implied growth / implied required return / break-even perpetual decline** (decliner mode), **sensitivity grid**, **exit-multiple cross-check**, terminal-share-of-value | #1, #2, #3, #6, #8 + 1.9 |
-| `risk.py` | **risk panel**: six continuous subscores (0–100, distance-from-danger curves), plain-language reasons, composite for ordering only, kill-gates preserved underneath | #5 |
+| `risk.py` | **risk panel**: six continuous subscores, **0 = far from danger (green) to 100 = at danger (red)**, per ENGINE_DESIGN "higher = riskier"; plain-language reasons, composite for ordering only, kill-gates preserved underneath | #5 |
 | `verdict.py` | **wrong-model refusal** (banks/insurers, pre-profit), v0.1 ladder bit-for-bit, optional risk-scaled bars (OFF by default) | #4, #5 |
 | `sizing.py` | **position sizing engine**: MoS ÷ risk composite, caps 8%/4%, sector ≤25%, min 2%, cash remainder | spec Part B |
 | `journal.py` | **JSONL decision journal** with verdict-change diffs and parameters hash | #7 |

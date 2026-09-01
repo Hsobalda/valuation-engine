@@ -66,16 +66,16 @@ def pct(x, signed=True, digits=1):
 
 
 def heat(score):
-    """Colour class for a 0-100 subscore (higher = safer)."""
+    """Colour class for a 0-100 RISK score (higher = riskier = redder)."""
     if score is None:
         return 'grey'
     if score >= 70:
-        return 'good'
+        return 'bad'
     if score >= 50:
-        return 'ok'
-    if score >= 35:
         return 'warn'
-    return 'bad'
+    if score >= 35:
+        return 'ok'
+    return 'good'
 
 
 CSS = """
@@ -114,7 +114,7 @@ td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
 .pos { color:#1b7a4a; font-weight:600; } .neg { color:#9b3b30; font-weight:600; }
 .note { color:var(--grey); font-size:11.5px; }
 /* football field */
-.ff { position:relative; margin:6px 0 2px; }
+.ff { position:relative; }
 .ff .row { display:grid; grid-template-columns:92px 1fr; gap:8px; align-items:center;
            margin:7px 0; }
 .ff .lbl { font-size:11.5px; color:#374151; text-align:right; }
@@ -128,8 +128,14 @@ td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
            transform:translateX(-50%); }
 .ff .diamond { position:absolute; top:0.5px; width:12px; height:12px;
                background:var(--ink); border:1.5px solid #fff; transform:translateX(-50%) rotate(45deg); }
-.ff .priceline { position:absolute; top:-4px; bottom:-2px; width:0;
+.ff .priceline { position:absolute; top:14px; bottom:0; width:0;
                  border-left:2px dashed var(--ink); transform:translateX(-1px); }
+.ff .plabel { position:absolute; top:0; font-size:9.5px; font-weight:600;
+              color:var(--ink); background:var(--paper); padding:0 4px;
+              border:1px solid var(--line); border-radius:2px;
+              transform:translateX(-50%); white-space:nowrap; }
+.ff .overlay { position:absolute; left:100px; right:0; top:-16px; bottom:0;
+               pointer-events:none; z-index:3; }
 .ff .tick { position:absolute; top:0; font-size:9.5px; color:var(--grey);
             transform:translateX(-50%); }
 /* heat chips + boxes */
@@ -195,12 +201,18 @@ def football(res):
     ticks = ''.join(f'<div class="tick" style="left:{t/xmax*100:.1f}%">{t}%</div>'
                     for t in (50, 100, 150) if t <= xmax * 100)
     axis = (f'<div class="row"><div class="lbl"></div><div class="axis">{ticks}'
-            f'<div class="priceline" style="left:{px:.1f}%" title="today {fmt_px(price, ccy)}"></div>'
             f'{fair_dot}</div></div>')
-    return (f'<div class="ff">{"".join(rows)}{axis}</div>'
-            f'<div class="note">Bars and dots: each method\'s fair value as % of '
-            f'today\'s price (dashed line). Diamond: consensus (median). '
-            f'Right of the line = undervalued.</div>')
+    # full-height price line: one overlay spans every row's track (labels
+    # column is 92px + 8px gap), so the dashed line runs through ALL methods
+    overlay = ('<div class="overlay">'
+               f'<div class="priceline" style="left:{px:.1f}%" '
+               f'title="today {fmt_px(price, ccy)}"></div>'
+               f'<div class="plabel" style="left:{px:.1f}%">'
+               f'today {fmt_px(price, ccy)}</div></div>')
+    return (f'<div class="ff">{"".join(rows)}{axis}{overlay}</div>'
+            '<div class="note">Bars and dots: each method\'s fair value as % of '
+            'today\'s price (the dashed line through all rows). Diamond: '
+            'consensus (median). Right of the line = undervalued.</div>')
 
 
 def valuation_table(res):
@@ -281,9 +293,10 @@ def risk_section(res):
     comp_html = (f'<div class="kv"><span>risk composite</span>'
                  f'<b>{comp}/100</b></div>' if comp is not None else '')
     return (f'{gates}{"".join(chips)}'
-            f'<div class="note" style="margin-top:6px">0-100 by distance from danger; '
-            f'100 = far from it. Subscores are judgement inputs; the composite only '
-            f'orders (sizing, ranking). Weights are DRAFT.</div>{comp_html}')
+            f'<div class="note" style="margin-top:6px">0 = far from danger, '
+            f'100 = at it (colour runs green to red with risk). Subscores are '
+            f'judgement inputs; the composite only orders (sizing, ranking). '
+            f'Weights are DRAFT.</div>{comp_html}')
 
 
 def keydata(res):

@@ -19,10 +19,10 @@ def test_panel_scores_and_reasons():
         assert sub['score'] is None or 0 <= sub['score'] <= 100
         assert name in sub['reason']
     assert panel['composite'] is not None and 0 <= panel['composite'] <= 100
-    # coverage 8.0x -> 90/100 per the anchor curve
-    assert panel['panel']['coverage']['score'] == 90
-    # flat FCF -> stability 100
-    assert panel['panel']['fcf_stability']['score'] == 100
+    # INVERTED scale (owner, 1 Sep 2026): 0 = far from danger, 100 = at it.
+    # coverage 8.0x -> risk 10/100; flat FCF -> risk 0/100
+    assert panel['panel']['coverage']['score'] == 10
+    assert panel['panel']['fcf_stability']['score'] == 0
 
 
 def test_panel_kill_gates_survive():
@@ -37,10 +37,10 @@ def test_panel_flags_spread_cap():
 
 
 def test_piecewise_anchors():
-    assert risk._piecewise(risk._CURVES['coverage'], 2.3)[0] == 41  # spec said ~40
+    assert risk._piecewise(risk._CURVES['coverage'], 2.3)[0] == 59  # ~60 risk
     assert risk._piecewise(risk._CURVES['coverage'], None)[0] is None
-    assert risk._piecewise(risk._CURVES['leverage'], 0)[0] == 100
-    assert risk._piecewise(risk._CURVES['leverage'], 6)[0] == 0
+    assert risk._piecewise(risk._CURVES['leverage'], 0)[0] == 0     # unlevered
+    assert risk._piecewise(risk._CURVES['leverage'], 6)[0] == 100   # max risk
 
 
 def test_composite_respects_draft_weights():

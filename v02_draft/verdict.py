@@ -36,12 +36,14 @@ def wrong_model(bundle):
 
 
 def scaled_bar(bar, risk_composite, enabled=None):
-    """Risk-scaled MoS bar. Disabled (or no composite) -> v0.1 bar unchanged."""
+    """Risk-scaled MoS bar. Disabled (or no composite) -> v0.1 bar unchanged.
+    Composite is on the inverted scale (100 = riskiest), so the bar RISES
+    with measured risk and is earned down by predictability."""
     if enabled is None:
         enabled = P.RISK_SCALED_BARS
     if not enabled or risk_composite is None:
         return bar
-    t = risk_composite / 100.0
+    t = (100 - risk_composite) / 100.0        # safety fraction
     factor = P.BAR_SCALE_WORST + t * (P.BAR_SCALE_BEST - P.BAR_SCALE_WORST)
     return bar * factor
 
