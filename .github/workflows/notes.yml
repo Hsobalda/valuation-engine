@@ -1,0 +1,52 @@
+name: Refresh research notes
+
+# Rebuilds the analyst-style HTML notes (notes/*.html) whenever the engine,
+# watchlist or draft changes, on the Mon/Thu 06:00 UTC schedule, or manually.
+# Tries live Yahoo data first; if the feed is unavailable it rebuilds from
+# the committed snapshots so the run never fails just because Yahoo hiccuped.
+# Refreshed notes + snapshots are committed back to the same branch.
+
+on:
+  push:
+    paths:
+      - "engine_v01.py"        # watchlist / theses / locked params
+      - "v02_draft/**"         # draft engine, params, note generator
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1,4"      # Mon & Thu morning, same cadence as deploy.yml
+
+permissions:
+  contents: write
+
+jobs:
+  notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Rebuild notes (live data, snapshot fallback)
+        run: |
+          python -m v02_draft.note --live || python -m v02_draft.note
+
+      - name: Run the test suite (never publish broken maths)
+        run: python -m pytest v02_draft/tests -q
+
+      - name: Commit refreshed notes and snapshots
+        run: |
+          git config user.name  "notes-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add notes v02_draft/snapshots
+          if git diff --cached --quiet; then
+            echo "no changes to commit"
+          else
+            git commit -m "notes: auto-refresh $(date -u +%F) [skip ci]"
+            git push
+          fi
