@@ -1,2 +1,8 @@
-yfinance
-matplotlib
+# Pinned: yfinance changes field semantics (e.g. dividendYield percent vs
+# fraction) and Yahoo renames statement rows between versions; unpinned
+# installs silently break fetch/normalisation (v02_draft/data.py absorbs
+# both, but pin anyway so runs are reproducible). Review on every bump.
+yfinance>=0.2.54,<2.0
+matplotlib>=3.8,<4.0
+# dev/test only (v02_draft):
+pytest>=8.0,<9.0
