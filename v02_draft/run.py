@@ -187,6 +187,8 @@ def main(argv=None):
     ap.add_argument('--grid', action='store_true', help='print sensitivity grids')
     ap.add_argument('--journal', default=None, help='JSONL journal path (append + diff)')
     ap.add_argument('--size', action='store_true', help='position sizing table')
+    ap.add_argument('--note', action='store_true',
+                    help='also write analyst-style HTML research notes to notes/')
     args = ap.parse_args(argv)
 
     symbols = args.symbols or list(WATCHLIST)
@@ -228,6 +230,9 @@ def main(argv=None):
         for sym, change, detail in diffs:
             if change != 'SAME':
                 print(f'  {sym:8} {change}: {detail}')
+    if args.note:
+        from .note import write_notes
+        write_notes([s for s, _ in results], live=False)
     print('\nDRAFT -- every new parameter needs owner sign-off (see params.py). '
           'engine_v01.py is untouched. Not financial advice.')
 

@@ -7,7 +7,10 @@ python -m v02_draft.run                      # offline run on cached snapshots
 python -m v02_draft.run T IMB.L --panels --grid --size
 python -m v02_draft.run --live               # fetch Yahoo, cache to snapshots/
 python -m v02_draft.run --journal journal/journal.jsonl
-python -m pytest v02_draft/tests -q          # 66 tests, no network
+python -m pytest v02_draft/tests -q          # 71 tests, no network
+
+python -m v02_draft.note T IMB.L             # analyst-style HTML research notes -> notes/
+python -m v02_draft.note --live T            # refresh snapshot first, then build
 ```
 
 ## Module map (what implements which comparison item)
@@ -21,7 +24,8 @@ python -m pytest v02_draft/tests -q          # 66 tests, no network
 | `verdict.py` | **wrong-model refusal** (banks/insurers, pre-profit), v0.1 ladder bit-for-bit, optional risk-scaled bars (OFF by default) | #4, #5 |
 | `sizing.py` | **position sizing engine**: MoS ÷ risk composite, caps 8%/4%, sector ≤25%, min 2%, cash remainder | spec Part B |
 | `journal.py` | **JSONL decision journal** with verdict-change diffs and parameters hash | #7 |
-| `tests/` | 66 offline tests: golden numbers, ladder edge cases at the exact 15/30/50 bars, F-Score hand-computed, Altman hand-computed, reverse-DCF roundtrips, sizing caps, journal diffs | COMPARISON 0.1 |
+| `note.py` | **analyst-style research notes**: one self-contained HTML page per company (rating masthead, football field, market-implied callouts, valuation table with provenance, risk heat panel, sensitivity grid, signed thesis, price triggers) + watchlist index. Prints to A4/PDF from the browser. `notes/*.html` | presentation layer |
+| `tests/` | 71 offline tests: golden numbers, ladder edge cases at the exact 15/30/50 bars, F-Score hand-computed, Altman hand-computed, reverse-DCF roundtrips, sizing caps, journal diffs, note content | COMPARISON 0.1 |
 
 ## What the draft already surfaces (review notes for the owner)
 
