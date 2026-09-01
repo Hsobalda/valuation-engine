@@ -48,5 +48,5 @@ jobs:
             echo "no changes to commit"
           else
             git commit -m "notes: auto-refresh $(date -u +%F) [skip ci]"
-            git push
+            git push origin HEAD:${{ github.ref_name }}
           fi
