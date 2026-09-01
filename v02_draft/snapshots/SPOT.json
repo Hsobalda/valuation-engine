@@ -12,7 +12,7 @@
  "pb": 11.42142,
  "div_yield": null,
  "mkt_cap": 111868649472,
- "fetched_at": "2026-09-01T21:54:38.761833+00:00",
+ "fetched_at": "2026-09-01T22:01:09.498498+00:00",
  "source": "live",
  "approximate": false,
  "fcf_hist": [
@@ -101,5 +101,5 @@
  "current_liab": 6085000000.0,
  "retained_earnings": -832000000.0,
  "long_term_debt": 1539000000.0,
- "fx": 1.1596892
+ "fx": 1.1595547
 }
