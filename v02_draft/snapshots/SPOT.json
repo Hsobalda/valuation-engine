@@ -6,13 +6,13 @@
  "price": 544.15,
  "price_ccy": "USD",
  "fin_ccy": "EUR",
- "shares": 205584205,
+ "shares": 205620061,
  "eps_ps": 18.45,
  "bvps_ps": 47.64294,
  "pb": 11.42142,
  "div_yield": null,
- "mkt_cap": 111868649472,
- "fetched_at": "2026-09-02T10:06:43.891035+00:00",
+ "mkt_cap": 111888162816,
+ "fetched_at": "2026-09-02T10:14:56.399167+00:00",
  "source": "live",
  "approximate": false,
  "fcf_hist": [
@@ -101,5 +101,5 @@
  "current_liab": 6085000000.0,
  "retained_earnings": -832000000.0,
  "long_term_debt": 1539000000.0,
- "fx": 1.1572735
+ "fx": 1.1575414
 }
