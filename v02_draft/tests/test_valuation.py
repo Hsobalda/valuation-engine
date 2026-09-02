@@ -153,3 +153,13 @@ def test_exit_multiple_crosscheck_positive():
     b2 = make_bundle(total_debt=10.0, cash=10.0)
     v3 = V.dcf_exit_multiple(b2, 0.0, 0.10, exit_mult=7.0, fcf_series=[10.0] * 4)
     assert v3 > v
+
+
+def test_owner_earnings_handles_yahoo_negative_capex():
+    """Regression, live run 2 Sep 2026: Yahoo returns capex NEGATIVE; the
+    deduction must use its magnitude. min(-20, 20) added capex back and
+    doubled fair values (T ~$58 vs ~$30)."""
+    b = make_bundle(capex_hist=[-4.0] * 4, da_hist=[-4.0] * 4)
+    series, prov = V.owner_fcf_hist(b)
+    assert series[0] == pytest.approx(8.0)      # 12 - min(4,4), NOT 12+4
+    assert 'owner earnings' in prov
