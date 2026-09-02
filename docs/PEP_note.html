@@ -1,0 +1,148 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Pepsico, Inc. (PEP) -- research note</title><style>
+:root { --ink:#1a2332; --paper:#faf9f7; --line:#d8d5d0; --grey:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+       color:var(--ink); background:#eceae6; font-size:14px; line-height:1.45; }
+.page { max-width:980px; margin:18px auto; background:var(--paper);
+        border:1px solid var(--line); box-shadow:0 2px 14px rgba(0,0,0,.08); }
+.masthead { display:flex; justify-content:space-between; align-items:center;
+            padding:8px 22px; background:var(--ink); color:#e8e6e1; font-size:11px;
+            letter-spacing:.14em; text-transform:uppercase; }
+.masthead b { color:#fff; }
+.banner { background:#f4e9d2; color:#7a5a12; padding:7px 22px; font-size:12px; }
+.head { display:flex; justify-content:space-between; align-items:flex-start;
+        gap:18px; padding:20px 22px 14px; border-bottom:3px solid var(--ink); }
+.head h1 { font-family:Georgia,'Times New Roman',serif; font-size:27px; font-weight:700; }
+.head .sub { color:var(--grey); font-size:12.5px; margin-top:3px; }
+.ratingbox { text-align:right; min-width:240px; }
+.rating { display:inline-block; color:#fff; font-weight:700; font-size:15px;
+          letter-spacing:.06em; padding:6px 16px; border-radius:3px; }
+.pxrow { margin-top:8px; font-size:13px; color:#374151; }
+.pxrow b { font-size:15px; color:var(--ink); }
+.grid { display:grid; grid-template-columns:1fr 292px; gap:0; }
+.left { padding:16px 20px; border-right:1px solid var(--line); }
+.right { padding:16px 18px; background:#f4f3f0; }
+h2 { font-family:Georgia,serif; font-size:15px; margin:18px 0 8px; 
+     padding-bottom:3px; border-bottom:1px solid var(--line); }
+h2:first-child { margin-top:0; }
+table { width:100%; border-collapse:collapse; font-size:12.5px; }
+th { text-align:left; color:var(--grey); font-weight:600; font-size:11px;
+     text-transform:uppercase; letter-spacing:.05em; padding:4px 6px;
+     border-bottom:1px solid var(--line); }
+td { padding:4.5px 6px; border-bottom:1px solid #eceae6; vertical-align:top; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.pos { color:#1b7a4a; font-weight:600; } .neg { color:#9b3b30; font-weight:600; }
+.note { color:var(--grey); font-size:11.5px; }
+/* football field */
+.ff { position:relative; }
+.ff .row { display:grid; grid-template-columns:92px 1fr; gap:8px; align-items:center;
+           margin:7px 0; }
+.ff .lbl { font-size:11.5px; color:#374151; text-align:right; }
+.ff .track { position:relative; height:16px; }
+.ff .axis { position:relative; height:16px; grid-column:2; }
+.ff .bar { position:absolute; top:4px; height:8px; border-radius:4px;
+           background:#1b7a4a33; border-left:2px solid #1b7a4a88;
+           border-right:2px solid #1b7a4a88; }
+.ff .dot { position:absolute; top:2.5px; width:11px; height:11px; border-radius:50%;
+           background:#1b7a4a; border:1.5px solid #fff; box-shadow:0 0 0 1px #1b7a4a;
+           transform:translateX(-50%); }
+.ff .diamond { position:absolute; top:0.5px; width:12px; height:12px;
+               background:var(--ink); border:1.5px solid #fff; transform:translateX(-50%) rotate(45deg); }
+.ff .priceline { position:absolute; top:14px; bottom:0; width:0;
+                 border-left:2px dashed var(--ink); transform:translateX(-1px); }
+.ff .plabel { position:absolute; top:0; font-size:9.5px; font-weight:600;
+              color:var(--ink); background:var(--paper); padding:0 4px;
+              border:1px solid var(--line); border-radius:2px;
+              transform:translateX(-50%); white-space:nowrap; }
+.ff .overlay { position:absolute; left:100px; right:0; top:-16px; bottom:0;
+               pointer-events:none; z-index:3; }
+.ff .tick { position:absolute; top:0; font-size:9.5px; color:var(--grey);
+            transform:translateX(-50%); }
+/* heat chips + boxes */
+.chip { display:inline-flex; align-items:center; gap:7px; padding:4px 9px;
+        border-radius:3px; margin:2.5px 2px; font-size:12px; background:#fff;
+        border:1px solid var(--line); }
+.chip .score { font-weight:700; font-size:12.5px; width:34px; text-align:center;
+               color:#fff; border-radius:2px; padding:1.5px 0; }
+.good{background:#1b7a4a;} .ok{background:#7a9a1b;} .warn{background:#c07f1b;}
+.bad{background:#9b3b30;} .grey{background:#8a8a8a;}
+.kv { display:flex; justify-content:space-between; padding:3.5px 0;
+      border-bottom:1px solid #eceae6; font-size:12.5px; }
+.kv span:first-child { color:var(--grey); }
+.kv b { font-variant-numeric:tabular-nums; }
+.callout { background:#fff; border:1px solid var(--line); border-left:3px solid var(--ink);
+           padding:9px 12px; margin:8px 0; font-size:12.5px; }
+.callout .big { font-family:Georgia,serif; font-size:19px; font-weight:700; }
+.reading { color:#374151; margin-top:3px; }
+.flag { color:#9b3b30; font-weight:600; }
+.gate { background:#fdeeec; border:1px solid #e5b5ae; padding:7px 10px; margin:6px 0;
+        font-size:12.5px; }
+.thesis { background:#f4f3f0; border:1px solid var(--line); padding:12px 14px;
+          font-size:12.5px; color:#374151; }
+.thesis .sig { margin-top:8px; color:var(--grey); font-size:11.5px; }
+.trig { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+.trig div { background:#fff; border:1px solid var(--line); padding:6px 10px;
+            font-size:12px; } .trig b { display:block; font-size:13px; }
+.footer { padding:12px 22px; font-size:10.5px; color:var(--grey);
+          border-top:1px solid var(--line); }
+.sens td, .sens th { text-align:center; padding:4px; }
+.sens .moS { font-size:10.5px; color:var(--grey); }
+@media print { body { background:#fff; } .page { border:none; box-shadow:none; margin:0; } }
+</style></head>
+<body><div class="page">
+<div class="masthead"><span><b>VALUATION ENGINE</b> · v0.2 DRAFT · semi-automatic</span>
+<span>2026-09-02 · live data</span></div>
+
+<div class="head">
+  <div><h1>Pepsico, Inc. <span style="color:var(--grey)">(PEP)</span></h1>
+    <div class="sub">Beverages - Non-Alcoholic · Consumer Defensive · discount rate 9%
+    (moat: wide)</div></div>
+  <div class="ratingbox"><span class="rating" style="background:#9b3b30">PASS</span>
+    <div class="pxrow">price <b>$139.79</b> ·
+      fair <b>$139.61</b> ·
+      MoS <b class="neg">-0%</b></div>
+    <div class="pxrow">position weight: <b>0%</b></div></div>
+</div>
+<div class="grid">
+  <div class="left">
+    <h2>Valuation: four independent methods</h2>
+    <div class="ff"><div class="row"><div class="lbl">EPV</div><div class="track"><div class="bar" style="left:35.3%;width:14.6%"></div><div class="dot" style="left:49.9%" title="EPV: $139.61 (-0.1%)"></div></div></div><div class="row"><div class="lbl">DCF(bear)</div><div class="track"><div class="bar" style="left:35.3%;width:25.5%"></div><div class="dot" style="left:60.8%" title="DCF(bear): $170.01 (+17.8%)"></div></div></div><div class="row"><div class="lbl">Multiples</div><div class="track"><div class="bar" style="left:35.3%;width:0.6%"></div><div class="dot" style="left:35.3%" title="Multiples: $98.74 (-41.6%)"></div></div></div><div class="row"><div class="lbl"></div><div class="axis"><div class="tick" style="left:2500.0%">50%</div><div class="tick" style="left:5000.0%">100%</div><div class="tick" style="left:7500.0%">150%</div><div class="diamond" style="left:49.9%" title="consensus $139.61"></div></div></div><div class="overlay"><div class="priceline" style="left:50.0%" title="today $139.79"></div><div class="plabel" style="left:50.0%">today $139.79</div></div></div><div class="note">Bars and dots: each method's fair value as % of today's price (the dashed line through all rows). Diamond: consensus (median). Right of the line = undervalued.</div>
+    <table><tr><th>method</th><th class="num">fair value</th><th class="num">vs price</th><th>basis</th></tr><tr><td>EPV</td><td class="num"><b>$139.61</b></td><td class="num neg">-0.1%</td><td class="note">zero-growth worth of the FCF input below</td></tr><tr><td>DCF(bear)</td><td class="num"><b>$170.01</b></td><td class="num pos">+17.8%</td><td class="note">10yr DCF, growth +1.0% capped at +2%</td></tr><tr><td>Graham</td><td class="num">n/a</td><td class="num">--</td><td class="note">asset-anchored; self-disabled when P/B > 5</td></tr><tr><td>Multiples</td><td class="num"><b>$98.74</b></td><td class="num neg">-41.6%</td><td class="note">normalised EPS x 15 (v0.1 flat long-run multiple)</td></tr><tr><td><b>Consensus (median)</b></td><td class="num"><b>$139.61</b></td><td class="num neg"><b>-0.1%</b></td><td class="note">margin of safety = (fair - price) / fair</td></tr></table>
+    <div class="note" style="margin-top:6px">FCF input: owner earnings = OCF - min(capex, D&A)
+    </div>
+
+    <h2>Cross-checks (where the model is fragile)</h2>
+    <div class="kv"><span>terminal value share of bear DCF</span>
+      <b>50%</b></div>
+    <div class="kv"><span>exit-multiple variant (7x EV/EBITDA terminal)</span>
+      <b>$91.93</b></div>
+    <div class="kv"><span>bull DCF (upside ceiling)</span><b>$183.09</b></div>
+    <div class="note" style="margin-top:5px">The Gordon terminal carries 50%
+    of the value; the exit-multiple variant shows what happens when it does not.</div>
+
+    <h2>Sensitivity: bear DCF</h2>
+    <table class="sens"><tr><th></th><th>terminal 1%</th><th>terminal 2%</th><th>terminal 3%</th></tr><tr><td class="num"><b>r = 9%</b></td><td>$158.60<div class="moS">+11.9%</div></td><td>$170.01<div class="moS">+17.8%</div></td><td>$185.22<div class="moS">+24.5%</div></td></tr><tr><td class="num"><b>r = 10%</b></td><td>$140.98<div class="moS">+0.8%</div></td><td>$149.15<div class="moS">+6.3%</div></td><td>$159.66<div class="moS">+12.4%</div></td></tr><tr><td class="num"><b>r = 11%</b></td><td>$126.88<div class="moS">-10.2%</div></td><td>$132.91<div class="moS">-5.2%</div></td><td>$140.44<div class="moS">+0.5%</div></td></tr><tr><td class="num"><b>r = 12%</b></td><td>$115.35<div class="moS">-21.2%</div></td><td>$119.90<div class="moS">-16.6%</div></td><td>$125.46<div class="moS">-11.4%</div></td></tr></table><div class="note">Bear DCF fair value per share at each discount rate x terminal growth; small grey figure = margin of safety vs today. Read: is the verdict robust or one assumption away from flipping?</div>
+
+    <h2>Thesis on file (owner-signed)</h2>
+    <div class="thesis">PASS. Wide moat is real: brands, distribution, shelf power, and Frito-Lay snacks carry the growth while soda declines. But the price wants growth the business does not have. At $144.67 the market implies ~10%/yr FCF growth for a decade; at a believable 4% the shares are worth ~$92, and my engine fair value is $79. Bull DCF is $144, todays price IS the bull case, even less margin than Tesco offered. Elliotts ~$4bn stake (Sept 2025, bottling and supply-chain review) is the catalyst the market leans on, but a cost programme cannot bridge a 10% growth assumption, and I dont pay 83% over fair value for someone elses activism working out. No fatal flags, purely price. Honest caveat: my zero-growth engine structurally undervalues wide-moat compounders and PEP is where that bias bites hardest, so true fair value sits above $79, just nowhere near $145. Wrong if: GLP-1 snack fears prove overdone AND Elliott unlocks 200bp+ of margin, together making 6-7% growth real. Interested below ~$110 where implied growth drops to ~6%, conviction near $92. [Signed 25 Aug 2026]
+    <div class="sig">Human inputs: moat wide · cyclicality False</div></div>
+
+    <h2>Verdict trace</h2>
+    <ul><li>no caps or notes: verdict issued on the ladder as-is</li></ul>
+    <div class="trig"><div>CAUTIOUS BUY below<b>$118.67</b></div><div>BUY below<b>$97.73</b></div><div>STRONG BUY below<b>$69.80</b></div></div>
+  </div>
+  <div class="right">
+    <h2>What the price is saying</h2>
+    <div class="callout"><div class="big">-1.7%/yr</div><div><b>implied FCF growth</b> in today's price ($139.79)</div><div class="reading">The market pays for <b>decline</b>: -1.7%/yr for a decade. You win if the real melt runs slower than the price assumes.</div></div><div class="callout"><div class="big">10.0%</div><div><b>implied return at zero growth</b></div><div class="reading">Below your 10% hurdle: you are not being paid enough to wait.</div></div>
+    <h2>Key data</h2>
+    <div class="kv"><span>market cap</span><b>191.0bn</b></div><div class="kv"><span>P/E</span><b>18.4</b></div><div class="kv"><span>P/B</span><b>8.6</b></div><div class="kv"><span>dividend yield</span><b>4.2%</b></div><div class="kv"><span>FCF yield (input)</span><b>9.0%</b></div><div class="kv"><span>interest coverage</span><b>10.1x</b></div><div class="kv"><span>net debt/EBITDA</span><b>2.6x</b></div><div class="kv"><span>Piotroski F-Score</span><b>5/9</b></div><div class="kv"><span>Altman Z</span><b>4.41 (safe)</b></div>
+    <h2>Risk panel</h2>
+    <span class="chip"><span class="score good">5</span>interest coverage 10.14x</span><span class="chip"><span class="score ok">42</span>net debt/EBITDA 2.62x</span><span class="chip"><span class="score good">17</span>FCF coefficient of variation 0</span><span class="chip"><span class="score ok">38</span>method spread 1.72x</span><span class="chip"><span class="score good">4</span>accruals (NI-OCF)/TA -3.6%</span><span class="chip"><span class="score good">20</span>4 yrs of FCF history</span><div class="note" style="margin-top:6px">0 = far from danger, 100 = at it (colour runs green to red with risk). Subscores are judgement inputs; the composite only orders (sizing, ranking). Weights are DRAFT.</div><div class="kv"><span>risk composite</span><b>21/100</b></div>
+    <h2>Data quality</h2>
+    <span class="chip"><span class="score good">OK</span>fcf history</span><span class="chip"><span class="score good">OK</span>net income history</span><span class="chip"><span class="score good">OK</span>price</span><span class="chip"><span class="score good">OK</span>per-share data</span><span class="chip"><span class="score good">OK</span>coverage inputs</span><span class="chip"><span class="score good">OK</span>capex/D&A rows</span><span class="chip"><span class="score good">OK</span>OCF rows</span><span class="chip"><span class="score good">OK</span>balance-sheet rows</span><span class="chip"><span class="score good">OK</span>dividend yield sane</span><span class="chip"><span class="score good">OK</span>snapshot freshness</span>
+  </div>
+</div>
+<div class="footer">Semi-automatic: the engine computes, you judge. Draft output from the
+v0.2 draft engine; every new parameter (risk curves, exit multiple, sizing) is pending owner
+sign-off, see v02_draft/README.md. Numbers from cached snapshots where marked. Not financial advice.</div></div></body></html>
