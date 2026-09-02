@@ -8,7 +8,7 @@ from v02_draft import run
 from v02_draft.data import load_snapshot
 from v02_draft.render import render, unrendered_tokens, variables
 
-SNAPS = os.path.join(os.path.dirname(__file__), '..', 'snapshots')
+SNAPS = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
 @pytest.fixture(scope='module')
