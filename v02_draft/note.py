@@ -24,7 +24,7 @@ from . import run
 from . import valuation as V
 
 OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                       'notes')
+                       'docs')
 
 # ---------------------------------------------------------------------------
 # palette / tone
