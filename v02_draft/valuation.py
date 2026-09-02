@@ -42,10 +42,13 @@ def discount_rate(inputs):
 # ---------------------------------------------------------------------------
 def owner_fcf_hist(bundle):
     """OCF - min(capex, D&A) per year where all three rows exist.
-    Falls back to headline FCF history. Returns (series, provenance)."""
+    Falls back to headline FCF history. Returns (series, provenance).
+    Yahoo reports capex NEGATIVE (cash outflow): deduct its MAGNITUDE.
+    (Regression, 2 Sep 2026: live runs doubled FCF inputs -- e.g. T fair
+    value ~$58 vs ~$30 -- because min(-20, 20) added capex back.)"""
     ocf = bundle.get('ocf_hist') or []
-    capex = bundle.get('capex_hist') or []
-    da = bundle.get('da_hist') or []
+    capex = [abs(c) for c in (bundle.get('capex_hist') or [])]
+    da = [abs(d) for d in (bundle.get('da_hist') or [])]
     n = min(len(ocf), len(capex), len(da))
     if n >= 2:
         series = [o - min(c, d) for o, c, d in zip(ocf[:n], capex[:n], da[:n])]
