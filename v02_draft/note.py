@@ -20,6 +20,7 @@ from datetime import date
 from . import metrics as M
 from . import params as P
 from . import risk as RISK
+from . import render as RENDER
 from . import run
 from . import valuation as V
 
@@ -373,7 +374,20 @@ def build_note(res):
 <div style="padding:20px 22px"><div class="gate"><b>This engine refuses to value this company.</b><br>
 {res['notes'][0] if res['notes'] else ''}</div></div>
 {FOOTER}</div></body></html>"""
-
+    # thesis: {tokens} inside the signed text are filled with THIS run's
+    # values so figures stay fresh; unknown tokens are surfaced, not silent
+    raw_thesis = inputs.get('thesis', 'MISSING: verdict capped at WATCH until written.')
+    thesis_text = RENDER.render(raw_thesis, res)
+    bad_tokens = RENDER.unrendered_tokens(raw_thesis, res)
+    thesis_note = ''
+    if '{' in raw_thesis:
+        thesis_note = ('<div class="note">Figures in {braces} auto-refresh from '
+                       'live data each run; the signed wording is unchanged.'
+                       '</div>')
+        if bad_tokens:
+            thesis_note += (f'<div class="gate"><b>Unrecognised tokens</b> left '
+                            f'as-is: {", ".join("{" + t + "}" for t in bad_tokens)}'
+                            '</div>')
     audit_chips = ''.join(
         f'<span class="chip"><span class="score {"good" if s=="OK" else ("warn" if s=="WARN" else "bad")}">'
         f'{s}</span>{name}</span>'
@@ -418,8 +432,9 @@ def build_note(res):
     {sens_table(res)}
 
     <h2>Thesis on file (owner-signed)</h2>
-    <div class="thesis">{inputs.get('thesis', 'MISSING: verdict capped at WATCH until written.')}
+    <div class="thesis">{thesis_text}
     <div class="sig">Human inputs: moat {inputs.get('moat')} · cyclicality {inputs.get('cyclical')}</div></div>
+    {thesis_note}
 
     <h2>Verdict trace</h2>
     <ul>{flags_html}{notes_html or '<li>no caps or notes: verdict issued on the ladder as-is</li>'}</ul>
