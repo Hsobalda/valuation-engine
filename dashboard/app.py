@@ -6,6 +6,13 @@ assumption panel. No valuation math lives here.
 
 from __future__ import annotations
 
+import os
+import sys
+
+# Make the repo root (the parent of this `dashboard/` package) importable, so
+# `from dashboard...` resolves regardless of how Streamlit launches the script.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import streamlit as st
 import pandas as pd
 
