@@ -1,0 +1,8 @@
+# Dashboard v1 dependencies (install into a venv, see README).
+yfinance>=0.2.54,<2.0
+streamlit>=1.55
+plotly>=6.0
+pandas>=2.2
+numpy>=1.26
+# dev/test only
+pytest>=8.0
