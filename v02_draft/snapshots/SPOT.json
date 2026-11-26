@@ -3,16 +3,16 @@
  "name": "Spotify Technology S.A.",
  "sector": "Communication Services",
  "industry": "Internet Content & Information",
- "price": 577.95,
+ "price": 616.46,
  "price_ccy": "USD",
  "fin_ccy": "EUR",
  "shares": 205525454,
  "eps_ps": 16.41,
  "bvps_ps": 47.779053,
- "pb": 12.096306,
+ "pb": 12.9023075,
  "div_yield": null,
- "mkt_cap": 118783442944,
- "fetched_at": "2026-11-23T16:43:28.803829+00:00",
+ "mkt_cap": 126698225664,
+ "fetched_at": "2026-11-26T15:56:56.635227+00:00",
  "source": "live",
  "approximate": false,
  "fcf_hist": [
@@ -101,5 +101,5 @@
  "current_liab": 6085000000.0,
  "retained_earnings": -832000000.0,
  "long_term_debt": 1539000000.0,
- "fx": 1.0896808
+ "fx": 1.0976949
 }
